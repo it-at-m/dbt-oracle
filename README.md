@@ -79,19 +79,15 @@ There is a nightly build that always uses the latest version of dbt-oracle and O
 
 Before being released to GHCR and DockerHub, all images are tested against an oraclexe database using a simple dbt debug.
 
-
-
-
-
-[contributors-shield]: https://img.shields.io/github/contributors/itgkarl/dbt-oracle.svg?style=for-the-badge
-[contributors-url]: https://github.com/itgkarl/dbt-oracle/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/itgkarl/dbt-oracle.svg?style=for-the-badge
-[forks-url]: https://github.com/itgkarl/dbt-oracle/network/members
-[stars-shield]: https://img.shields.io/github/stars/itgkarl/dbt-oracle.svg?style=for-the-badge
-[stars-url]: https://github.com/itgkarl/dbt-oracle/stargazers
-[issues-shield]: https://img.shields.io/github/issues/itgkarl/dbt-oracle.svg?style=for-the-badge
-[issues-url]: https://github.com/itgkarl/dbt-oracle/issues
-[license-shield]: https://img.shields.io/github/license/itgkarl/dbt-oracle.svg?style=for-the-badge
-[license-url]: https://github.com/itgkarl/dbt-oracle/blob/main/LICENSE
-[github-workflow-status]: https://img.shields.io/github/actions/workflow/status/itgkarl/dbt-oracle/build.yaml?style=for-the-badge
-[github-workflow-status-url]: https://github.com/itgkarl/dbt-oracle/actions/workflows/build.yaml
+[contributors-shield]: https://img.shields.io/github/contributors/it-at-m/dbt-oracle.svg?style=for-the-badge
+[contributors-url]: https://github.com/it-at-m/dbt-oracle/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/it-at-m/dbt-oracle.svg?style=for-the-badge
+[forks-url]: https://github.com/it-at-m/dbt-oracle/network/members
+[stars-shield]: https://img.shields.io/github/stars/it-at-m/dbt-oracle.svg?style=for-the-badge
+[stars-url]: https://github.com/it-at-m/dbt-oracle/stargazers
+[issues-shield]: https://img.shields.io/github/issues/it-at-m/dbt-oracle.svg?style=for-the-badge
+[issues-url]: https://github.com/it-at-m/dbt-oracle/issues
+[license-shield]: https://img.shields.io/github/license/it-at-m/dbt-oracle.svg?style=for-the-badge
+[license-url]: https://github.com/it-at-m/dbt-oracle/blob/main/LICENSE
+[github-workflow-status]: https://img.shields.io/github/actions/workflow/status/it-at-m/dbt-oracle/build.yaml?style=for-the-badge
+[github-workflow-status-url]: https://github.com/it-at-m/dbt-oracle/actions/workflows/build.yaml
