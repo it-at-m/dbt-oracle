@@ -1,6 +1,7 @@
 dbt:
   outputs:
     dw:
+      database: XEPDB1
       host: oraclexe
       password: notsecret
       port: 1521
