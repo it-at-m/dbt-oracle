@@ -2,7 +2,7 @@
 # Image providing Data Build Tools (dbt) with dbt-oracle and Oracle Instant Client (thick mode) pre-installed.
 
 # Prepare Stage to download and unzip the instantclient
-FROM alpine:latest as prepare
+FROM alpine:latest AS prepare
 
 # Zip is needed to unzip instantclient
 RUN apk --no-cache add zip
@@ -12,7 +12,7 @@ ADD https://download.oracle.com/otn_software/linux/instantclient/instantclient-b
 RUN unzip /sharedFiles/instantclient* -d /sharedFiles/unzip/
 
 # Mainstage: Official dbt-core image from dbt Labs as startingpoint
-FROM ghcr.io/dbt-labs/dbt-core:latest as dbt-oracle
+FROM ghcr.io/dbt-labs/dbt-core:latest AS dbt-oracle
 
 # Arg to control if a specific dbt-oracle version should be used. Default: [empty = latest] Value: ['==1.3.1' = v1.3.1 of dbt-oracle]
 ARG DBT_ORACLE_VERSION=''
