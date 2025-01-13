@@ -41,7 +41,7 @@ The image is originally designed to be used as a container image in a CI/CD pipe
 run-dbt:
   runs-on: ubuntu-latest
   container:
-    image: ghcr.io/itatm/dbt-oracle:latest
+    image: ghcr.io/it-at-m/dbt-oracle
 
   steps:
     - name: Checkout
@@ -56,7 +56,7 @@ run-dbt:
 ```yaml
 run-dbt:
   stage: dbt
-  image: ghcr.io/itatm/dbt-oracle:latest
+  image: ghcr.io/it-at-m/dbt-oracle
   script:
     - "cd src/test/dbt_test && dbt debug --profiles-dir=."
 ```
@@ -66,7 +66,7 @@ Example with profiles.yml as GitLab-CICD-File-Variable
 ```yaml
 run-dbt:
   stage: dbt
-  image: ghcr.io/itatm/dbt-oracle:latest
+  image: ghcr.io/it-at-m/dbt-oracle
   script:
     - "export DBT_PROFILES_FOLDER=$(dirname $DBT_PROFILES_YML)"
     - "mv $DBT_PROFILES_YML $DBT_PROFILES_FOLDER/profiles.yml"
