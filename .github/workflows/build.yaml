@@ -54,7 +54,7 @@ jobs:
             type=raw,value=${{ env.DEV_TAG }}
 
       - name: Build and push untested Docker image to GHCR
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -123,7 +123,7 @@ jobs:
             type=schedule,pattern=nightly,enable=${{ github.event_name == 'schedule' }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
