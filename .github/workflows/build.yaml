@@ -10,7 +10,7 @@ on:
     inputs:
       version:
         type: string
-        required: true
+        required: false
         description: semver - Version of dbt-oracle the image will use. Also the new Version Tag of this image.
         default: ""
 
