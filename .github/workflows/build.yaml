@@ -93,7 +93,9 @@ jobs:
   # If the test was positive we rebuild the Image from cache and publish it to GHCR and Dockerhub
   publish-tested-image:
     needs: test-untested-image
-    if: github.event_name != 'push'
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.version != '')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
