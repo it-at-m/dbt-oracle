@@ -14,6 +14,8 @@ This repository is for building and distributing a dbt image for working with Or
 
 The image is based on the original [dbt-core](https://github.com/dbt-labs/dbt-core) image with a post-installed [dbt-oracle](https://docs.getdbt.com/reference/warehouse-setups/oracle-setup) adapter.
 
+The repository also builds a separate `dbt-postgres` image based on the official `dbt-core` image with the `dbt-postgres` adapter pre-installed. It is published as `ghcr.io/it-at-m/dbt-postgres`.
+
 The image is also enhanced with the official [Oracle Instant Client](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html) to allow dbt-oracle to be used in Oracle [thick mode](https://python-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#enablingthick).
 
 ## Thick installation of dbt-oracle
