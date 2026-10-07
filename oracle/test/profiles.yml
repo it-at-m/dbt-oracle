@@ -1,0 +1,14 @@
+dbt:
+  outputs:
+    dw:
+      database: XEPDB1
+      host: oraclexe
+      password: notsecret
+      port: 1521
+      protocol: tcp
+      schema: pdbadmin
+      service: XEPDB1
+      threads: 1
+      type: oracle
+      user: pdbadmin
+  target: dw
