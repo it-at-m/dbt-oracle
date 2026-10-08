@@ -73,7 +73,7 @@ jobs:
     needs: build-and-push-untested-image-to-ghcr
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.IMAGE_REPO }}@${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
+      image: ghcr.io/it-at-m/dbt-postgres@${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
 
     services:
       postgres:
