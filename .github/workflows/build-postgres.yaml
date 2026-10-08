@@ -106,7 +106,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.version != '')
     runs-on: ubuntu-latest
     steps:
-            - name: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v7
 
       - name: Login to GitHub Container Registry
