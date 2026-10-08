@@ -1,5 +1,10 @@
 name: build-oracle
 
+permissions:
+  contents: read
+  packages: write
+
+
 on:
   push:
 
