@@ -1,23 +1,23 @@
-name: build-oracle
+name: build-postgres
 
 on:
   push:
 
   schedule:
-    - cron: "15 2 * * *" # run at 2:15 AM UTC
+    - cron: "30 2 * * *" # run at 2:30 AM UTC
 
   workflow_dispatch:
     inputs:
       version:
         type: string
         required: false
-        description: semver - Version of dbt-oracle the image will use. Also the new Version Tag of this image.
+        description: semver - Version of dbt-postgres the image will use. Also the new Version Tag of this image.
         default: ""
 
 env:
   DEV_TAG: untested
-  DBT_ORACLE_VERSION: ${{ github.event.inputs.version == '' && ' ' ||  format('=={0}', github.event.inputs.version) }}
-  IMAGE_REPO: ghcr.io/it-at-m/dbt-oracle
+  DBT_POSTGRES_VERSION: ${{ github.event.inputs.version == '' && ' ' ||  format('=={0}', github.event.inputs.version) }}
+  IMAGE_REPO: ghcr.io/it-at-m/dbt-postgres
 
 jobs:
   # Build a Version of the image tage with 'untested'.
@@ -52,18 +52,18 @@ jobs:
       - name: Build and push untested Docker image to GHCR
         uses: docker/build-push-action@v7
         with:
-          context: ./oracle
+          context: ./postgres
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-to: type=gha,mode=max
           build-args: |
-            DBT_ORACLE_VERSION=${{ env.DBT_ORACLE_VERSION }}
+            DBT_POSTGRES_VERSION=${{ env.DBT_POSTGRES_VERSION }}
 
     outputs:
       imagename: ${{ steps.meta.outputs.tags }}
 
-  # Use the Image taged with 'untested' and run it agains a oraclexe servicecontainer to check if everything is working
+  # Use the Image taged with 'untested' and run it agains a postgresxe servicecontainer to check if everything is working
   test-untested-image:
     needs: build-and-push-untested-image-to-ghcr
     runs-on: ubuntu-latest
@@ -71,21 +71,21 @@ jobs:
       image: ${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagename }}
 
     services:
-      oraclexe:
-        image: container-registry.oracle.com/database/express:21.3.0-xe
+      postgres:
+        image: docker.io/library/postgres:18
         env:
-          ORACLE_PWD: notsecret
+          POSTGRES_PASSWORD: postgres
         ports:
-          - 1521:1521
+          - 5432:5432
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Test image - dbt debug against oracle db
+      - name: Test image - dbt debug against postgres db
         run: |
           dbt --version
           cd test
-          dbt debug --profiles-dir=../oracle/test
+          dbt debug --profiles-dir=../postgres/test
 
   # If the test was positive we rebuild the Image from cache and publish it to GHCR and Dockerhub
   publish-tested-image:
@@ -123,11 +123,11 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
-          context: ./oracle
+          context: ./postgres
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            DBT_ORACLE_VERSION=${{ env.DBT_ORACLE_VERSION }}
+            DBT_POSTGRES_VERSION=${{ env.DBT_POSTGRES_VERSION }}
