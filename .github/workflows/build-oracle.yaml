@@ -56,6 +56,7 @@ jobs:
 
       - name: Build and push untested Docker image to GHCR
         uses: docker/build-push-action@v7
+        id: build-and-push
         with:
           context: ./oracle
           push: true
@@ -66,14 +67,13 @@ jobs:
             DBT_ORACLE_VERSION=${{ env.DBT_ORACLE_VERSION }}
 
     outputs:
-      imagename: ${{ steps.meta.outputs.tags }}
+      imagedigest: ${{ steps.build-and-push.outputs.digest }}
 
   # Use the Image taged with 'untested' and run it agains a oraclexe servicecontainer to check if everything is working
   test-untested-image:
     needs: build-and-push-untested-image-to-ghcr
-    runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagename }}
+      image: ghcr.io/it-at-m/dbt-oracle@${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
 
     services:
       oraclexe:
@@ -103,12 +103,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
@@ -116,23 +110,15 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Publish
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.IMAGE_REPO }}
-          tags: |
-            type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
-            type=schedule,pattern=nightly,enable=${{ github.event_name == 'schedule' }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./oracle
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            DBT_ORACLE_VERSION=${{ env.DBT_ORACLE_VERSION }}
+      - name: Retag and push tested digest as nightly or version
+        run: |
+          DIGEST="${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}"
+          IMAGE_REPO="${{ env.IMAGE_REPO }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            TAG="nightly"
+          else
+            TAG="${{ github.event.inputs.version }}"
+          fi
+          docker pull "${IMAGE_REPO}@${DIGEST}"
+          docker tag "${IMAGE_REPO}@${DIGEST}" "${IMAGE_REPO}:${TAG}"
+          docker push "${IMAGE_REPO}:${TAG}
