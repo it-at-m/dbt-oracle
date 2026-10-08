@@ -4,7 +4,7 @@ Container image providing [Data Build Tools (dbt)](https://www.getdbt.com/) with
 
 ## How to use the image
 
-The image is originally designed to be used as a container image in a CI/CD pipeline that wants to run a dbt project against an PostgreSQL database.
+The image is originally designed to be used as a container image in a CI/CD pipeline that wants to run a dbt project against a PostgreSQL database.
 
 ### GitHub actions
 
@@ -52,4 +52,4 @@ Specific version tags of this image represent a specific dbt-postgres version th
 
 There is a nightly build that always uses the latest version of dbt-postgres available.
 
-Before being released to GHCR, all images are tested against an PostgreSQL database using a simple dbt debug.
+Before being released to GHCR, all images are tested against a PostgreSQL database using a simple dbt debug.
