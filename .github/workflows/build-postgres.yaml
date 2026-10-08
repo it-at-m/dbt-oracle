@@ -14,6 +14,10 @@ on:
         description: semver - Version of dbt-postgres the image will use. Also the new Version Tag of this image.
         default: ""
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   DEV_TAG: untested
   DBT_POSTGRES_VERSION: ${{ github.event.inputs.version == '' && ' ' ||  format('=={0}', github.event.inputs.version) }}
