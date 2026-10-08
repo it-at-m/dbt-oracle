@@ -72,6 +72,7 @@ jobs:
   # Use the Image taged with 'untested' and run it agains a oraclexe servicecontainer to check if everything is working
   test-untested-image:
     needs: build-and-push-untested-image-to-ghcr
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/it-at-m/dbt-oracle@${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
 
