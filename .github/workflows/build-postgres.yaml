@@ -1,5 +1,9 @@
 name: build-postgres
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
 
