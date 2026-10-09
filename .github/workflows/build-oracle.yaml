@@ -1,0 +1,125 @@
+name: build-oracle
+
+permissions:
+  contents: read
+  packages: write
+
+
+on:
+  push:
+
+  schedule:
+    - cron: "15 2 * * *" # run at 2:15 AM UTC
+
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: semver - Version of dbt-oracle the image will use. Also the new Version Tag of this image.
+        default: ""
+
+env:
+  DEV_TAG: untested
+  DBT_ORACLE_VERSION: ${{ github.event.inputs.version == '' && ' ' ||  format('=={0}', github.event.inputs.version) }}
+  IMAGE_REPO: ghcr.io/it-at-m/dbt-oracle
+
+jobs:
+  # Build a Version of the image tage with 'untested'.
+  build-and-push-untested-image-to-ghcr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_REPO }}
+          tags: |
+            type=raw,value=${{ env.DEV_TAG }}
+
+      - name: Build and push untested Docker image to GHCR
+        uses: docker/build-push-action@v7
+        id: build-and-push
+        with:
+          context: ./oracle
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-to: type=gha,mode=max
+          build-args: |
+            DBT_ORACLE_VERSION=${{ env.DBT_ORACLE_VERSION }}
+
+    outputs:
+      imagedigest: ${{ steps.build-and-push.outputs.digest }}
+
+  # Use the Image taged with 'untested' and run it agains a oraclexe servicecontainer to check if everything is working
+  test-untested-image:
+    needs: build-and-push-untested-image-to-ghcr
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/it-at-m/dbt-oracle@${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
+
+    services:
+      oraclexe:
+        image: container-registry.oracle.com/database/express:21.3.0-xe
+        env:
+          ORACLE_PWD: notsecret
+        ports:
+          - 1521:1521
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Test image - dbt debug against oracle db
+        run: |
+          dbt --version
+          cd test
+          dbt debug --profiles-dir=../oracle/test
+
+  # If the test was positive we rebuild the Image from cache and publish it to GHCR and Dockerhub
+  publish-tested-image:
+    needs: test-untested-image
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.version != '')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retag and push tested digest as nightly or version
+        run: |
+          DIGEST="${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}"
+          IMAGE_REPO="${{ env.IMAGE_REPO }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            TAG="nightly"
+          else
+            TAG="${{ github.event.inputs.version }}"
+          fi
+          docker pull "${IMAGE_REPO}@${DIGEST}"
+          docker tag "${IMAGE_REPO}@${DIGEST}" "${IMAGE_REPO}:${TAG}"
+          docker push "${IMAGE_REPO}:${TAG}

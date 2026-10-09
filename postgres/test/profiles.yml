@@ -1,0 +1,12 @@
+dbt:
+  outputs:
+    dw:
+      dbname: postgres
+      host: postgres
+      password: postgres
+      port: 5432
+      schema: dbt
+      threads: 1
+      type: postgres
+      user: postgres
+  target: dw
