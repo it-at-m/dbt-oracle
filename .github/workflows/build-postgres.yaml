@@ -100,7 +100,9 @@ jobs:
 
   # If the test was positive we rebuild the Image from cache and publish it to GHCR and Dockerhub
   publish-tested-image:
-    needs: test-untested-image
+    needs:
+      - build-and-push-untested-image-to-ghcr
+      - test-untested-image
     if: |
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && inputs.version != '')
@@ -117,14 +119,25 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Retag and push tested digest as nightly or version
+        env:
+          DIGEST: ${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
+          IMAGE_REPO: ${{ env.IMAGE_REPO }}
+          EVENT_NAME: ${{ github.event_name }}
+          VERSION: ${{ inputs.version }}
         run: |
-          DIGEST="${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}"
-          IMAGE_REPO="${{ env.IMAGE_REPO }}"
-          if [ "${{ github.event_name }}" = "schedule" ]; then
+          set -euo pipefail
+
+          if [ -z "$DIGEST" ]; then
+            echo "Error: Image digest is empty"
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "schedule" ]; then
             TAG="nightly"
           else
-            TAG="${{ github.event.inputs.version }}"
+            TAG="$VERSION"
           fi
+
           docker pull "${IMAGE_REPO}@${DIGEST}"
           docker tag "${IMAGE_REPO}@${DIGEST}" "${IMAGE_REPO}:${TAG}"
-          docker push "${IMAGE_REPO}:${TAG}
+          docker push "${IMAGE_REPO}:${TAG}"
