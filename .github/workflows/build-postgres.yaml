@@ -118,12 +118,20 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Retag and push tested digest as nightly or version
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_REPO }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
+            type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
+
+      - name: Retag and push tested digest
         env:
           DIGEST: ${{ needs.build-and-push-untested-image-to-ghcr.outputs.imagedigest }}
           IMAGE_REPO: ${{ env.IMAGE_REPO }}
-          EVENT_NAME: ${{ github.event_name }}
-          VERSION: ${{ inputs.version }}
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           set -euo pipefail
 
@@ -132,12 +140,10 @@ jobs:
             exit 1
           fi
 
-          if [ "$EVENT_NAME" = "schedule" ]; then
-            TAG="nightly"
-          else
-            TAG="$VERSION"
-          fi
-
           docker pull "${IMAGE_REPO}@${DIGEST}"
-          docker tag "${IMAGE_REPO}@${DIGEST}" "${IMAGE_REPO}:${TAG}"
-          docker push "${IMAGE_REPO}:${TAG}"
+
+          while IFS= read -r image_tag; do
+            [ -z "$image_tag" ] && continue
+            docker tag "${IMAGE_REPO}@${DIGEST}" "$image_tag"
+            docker push "$image_tag"
+          done <<< "$TAGS"
